@@ -1,1 +1,6 @@
-
+-Tech Stack-
+1.Python
+2.Pandas
+3.Scikit-learn
+4.Basic NLP (keyword detection)
+5.Streamlit (for demo interface)
