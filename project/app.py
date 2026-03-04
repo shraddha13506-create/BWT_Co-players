@@ -17,30 +17,40 @@ url_phishing_model = pickle.load(open("../models/url_model.pkl", "rb"))
 sms_spam_model = pickle.load(open("../models/sms_model.pkl", "rb"))
 vectorizer = pickle.load(open("../models/sms_vectorizer.pkl", "rb"))
 
-# -------------------------
-# URL Prediction
-# -------------------------
+# -----------------------------
+# Page Title
+# -----------------------------
+st.set_page_config(page_title="Email & SMS Safety Assistant", layout="centered")
+st.title("🔐 Real-Time Email & SMS Safety Assistant")
 
-url = input("Enter URL to analyze: ")
+st.markdown("---")
 
-# The extract_features function is defined in TVXkeUnl17gx
-features = extract_features(url)
+# -----------------------------
+# URL PHISHING SECTION
+# -----------------------------
+st.header("🌐 URL Phishing Detection")
 
-prediction = url_phishing_model.predict(features)[0]
-probability = url_phishing_model.predict_proba(features)[0][1] * 100
+url = st.text_input("Enter URL to analyze:")
 
-print("\n--- Analysis Result ---")
+if st.button("Analyze URL"):
+    if url.strip() == "":
+        st.warning("Please enter a URL.")
+    else:
+        features = extract_features(url)
+        prediction = url_phishing_model.predict(features)[0]
+        probability = url_phishing_model.predict_proba(features)[0][1] * 100
 
-if prediction == 1:
-    print("⚠️  Potential Phishing URL")
-else:
-    print("✅ Likely Legitimate URL")
+        if prediction == 1:
+            st.error(f"⚠️ Potential Phishing URL\n\nRisk Score: {probability:.2f}%")
+        else:
+            st.success(f"✅ Likely Legitimate URL\n\nRisk Score: {probability:.2f}%")
 
-print(f"Risk Score: {probability:.2f}%")
+st.markdown("---")
 
-# -------------------------
-# SMS Prediction
-# -------------------------
+# -----------------------------
+# SMS SPAM SECTION
+# -----------------------------
+st.header("📩 SMS Spam Detection")
 
 def clean_text(text):
     text = text.lower()
@@ -59,28 +69,32 @@ def predict_sms(text):
     else:
         return f"✅ NOT SPAM (Confidence: {(1-probability)*100:.2f}%)"
 
-print("\nChoose Input Method:")
-print("1 → Type SMS manually")
-print("2 → Upload Screenshot Image")
-print("3 → Exit")
+input_method = st.radio(
+    "Choose Input Method:",
+    ("Type SMS manually", "Upload Screenshot Image")
+)
 
-choice = input("Enter choice (1/2/3): ")
+if input_method == "Type SMS manually":
+    user_text = st.text_area("Enter your SMS message:")
+    
+    if st.button("Analyze SMS"):
+        if user_text.strip() == "":
+            st.warning("Please enter an SMS message.")
+        else:
+            result = predict_sms(user_text)
+            st.info(result)
 
-if choice == "1":
-    user_text = input("\nEnter your SMS: ")
-    result = predict_sms(user_text)
-    print("Prediction:", result)
+elif input_method == "Upload Screenshot Image":
+    uploaded_file = st.file_uploader("Upload an image containing SMS text", type=["png", "jpg", "jpeg"])
 
-elif choice == "2":
-    image_path = input("Enter image path: ")
-    img = Image.open(image_path)
-    extracted_text = pytesseract.image_to_string(img)
+    if uploaded_file is not None:
+        img = Image.open(uploaded_file)
+        st.image(img, caption="Uploaded Image", use_column_width=True)
 
-    print("\nExtracted Text:")
-    print(extracted_text)
+        extracted_text = pytesseract.image_to_string(img)
 
-    result = predict_sms(extracted_text)
-    print("\nPrediction from Image:", result)
+        st.subheader("Extracted Text:")
+        st.write(extracted_text)
 
-elif choice == "3":
-    print("Program Ended.")
+        result = predict_sms(extracted_text)
+        st.info(result)
