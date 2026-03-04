@@ -22,4 +22,4 @@ The system generates a risk score and flags the message if it looks dangerous â€
 3.Feature Extraction Module analyzes patterns
 4.Machine Learning Model predicts phishing probability
 5.Risk Scoring Engine assigns score (0â€“100%)
-6.System alerts user before action is taken
+6.System alerts user before action is taken.
