@@ -1,15 +1,21 @@
-
 import streamlit as st
 import pickle
-from src.url_features import extract_features
-
+import sys
+import os
 import re
 import numpy as np
 import pytesseract
 from PIL import Image
 
-# Use models from previously executed cells
-# url_phishing_model, sms_spam_model, and vectorizer are assumed to be globally available
+# Allow access to parent folder (so src works)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.url_features import extract_features
+
+# Load models
+url_phishing_model = pickle.load(open("../models/url_model.pkl", "rb"))
+sms_spam_model = pickle.load(open("../models/sms_model.pkl", "rb"))
+vectorizer = pickle.load(open("../models/sms_vectorizer.pkl", "rb"))
 
 # -------------------------
 # URL Prediction
